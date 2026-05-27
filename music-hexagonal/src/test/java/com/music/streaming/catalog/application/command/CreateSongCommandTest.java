@@ -1,6 +1,6 @@
 package com.music.streaming.catalog.application.command;
 
-import com.music.streaming.catalog.application.port.SongRepository;
+import com.music.streaming.catalog.application.port.SongRepositoryPort;
 import com.music.streaming.catalog.domain.DuplicatedSongException;
 import com.music.streaming.catalog.domain.InvalidSongException;
 import com.music.streaming.catalog.domain.Song;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 class CreateSongCommandTest {
 
     @Mock
-    SongRepository songRepository;
+    SongRepositoryPort songRepository;
 
     SongDomainService songDomainService = new SongDomainService();
 

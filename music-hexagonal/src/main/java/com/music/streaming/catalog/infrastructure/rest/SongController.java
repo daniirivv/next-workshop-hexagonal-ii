@@ -3,7 +3,7 @@ package com.music.streaming.catalog.infrastructure.rest;
 import com.music.streaming.catalog.application.command.CreateSongCommand;
 import com.music.streaming.catalog.application.command.DeleteSongCommand;
 import com.music.streaming.catalog.application.command.UpdateSongCommand;
-import com.music.streaming.catalog.application.port.SongRepository;
+import com.music.streaming.catalog.application.port.SongRepositoryPort;
 import com.music.streaming.catalog.application.query.GetAllSongsQuery;
 import com.music.streaming.catalog.application.query.GetSongByIdQuery;
 import com.music.streaming.catalog.domain.DuplicatedSongException;
@@ -29,7 +29,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class SongController {
     final SongFacadeMapper songFacadeMapper;
-    final SongRepository songRepository;
+    final SongRepositoryPort songRepository;
     final SongDomainService songDomainService;
 
     @GetMapping

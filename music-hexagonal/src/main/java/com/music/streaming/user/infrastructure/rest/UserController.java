@@ -1,5 +1,7 @@
 package com.music.streaming.user.infrastructure.rest;
 
+import com.music.streaming.catalog.application.port.SongRepositoryPort;
+import com.music.streaming.catalog.infrastructure.rest.dto.response.GetSongResponseDTO;
 import com.music.streaming.user.application.command.CreateUserCommand;
 import com.music.streaming.user.application.command.DeleteUserCommand;
 import com.music.streaming.user.application.command.UpdateUserCommand;
@@ -29,6 +31,7 @@ import java.util.Optional;
 public class UserController {
     final UserFacadeMapper userFacadeMapper;
     final UserRepositoryPort userRepositoryPort;
+    final SongRepositoryPort songRepository;
 
     @GetMapping
     public ResponseEntity<List<GetUserResponseDTO>> getAllUsers() {
@@ -87,5 +90,20 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/starred-songs")
+    public ResponseEntity<List<GetSongResponseDTO>> getStarredSongs(@PathVariable String id) {
+
+    }
+
+    @PatchMapping("/{id}/songs")
+    public ResponseEntity<Void> addSongToStarredList(){
+
+    }
+
+    @PatchMapping("/{id}/songs")
+    public ResponseEntity<Void> removeSongFromStarredList() {
+
     }
 }

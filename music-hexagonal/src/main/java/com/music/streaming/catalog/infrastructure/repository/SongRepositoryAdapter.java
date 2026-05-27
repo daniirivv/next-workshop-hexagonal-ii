@@ -1,6 +1,6 @@
 package com.music.streaming.catalog.infrastructure.repository;
 
-import com.music.streaming.catalog.application.port.SongRepository;
+import com.music.streaming.catalog.application.port.SongRepositoryPort;
 import com.music.streaming.catalog.domain.Song;
 import com.music.streaming.catalog.infrastructure.repository.entity.SongEntity;
 import com.music.streaming.catalog.infrastructure.repository.mapper.SongEntityMapper;
@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class SongRepositoryAdapter implements SongRepository {
+public class SongRepositoryAdapter implements SongRepositoryPort {
     final SongEntityMapper songEntityMapper;
     final SongJpaRepository songJpaRepository;
 
@@ -43,8 +43,7 @@ public class SongRepositoryAdapter implements SongRepository {
     }
 
     @Override
-    public String createSong(Song song) {
+    public void createSong(Song song) {
         songJpaRepository.save(songEntityMapper.fromDomain(song));
-        return song.getId();
     }
 }

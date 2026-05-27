@@ -1,6 +1,6 @@
 package com.music.streaming.catalog.application.command;
 
-import com.music.streaming.catalog.application.port.SongRepository;
+import com.music.streaming.catalog.application.port.SongRepositoryPort;
 import com.music.streaming.catalog.domain.InvalidSongException;
 import com.music.streaming.catalog.domain.Song;
 import com.music.streaming.catalog.domain.SongNotFoundException;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
 class DeleteSongCommandTest {
 
     @Mock
-    SongRepository songRepository;
+    SongRepositoryPort songRepository;
 
     @Test
     void handle_shouldSucceedWhenValid() {

@@ -1,6 +1,6 @@
 package com.music.streaming.catalog.application.command;
 
-import com.music.streaming.catalog.application.port.SongRepository;
+import com.music.streaming.catalog.application.port.SongRepositoryPort;
 import com.music.streaming.catalog.domain.InvalidSongException;
 import com.music.streaming.catalog.domain.SongNotFoundException;
 import lombok.NonNull;
@@ -11,7 +11,7 @@ import java.util.UUID;
 @SuperBuilder
 public class DeleteSongCommand {
     @NonNull
-    final SongRepository songRepository;
+    final SongRepositoryPort songRepository;
     @NonNull
     final String id;
 

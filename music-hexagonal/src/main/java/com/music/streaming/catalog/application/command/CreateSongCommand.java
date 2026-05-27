@@ -1,6 +1,6 @@
 package com.music.streaming.catalog.application.command;
 
-import com.music.streaming.catalog.application.port.SongRepository;
+import com.music.streaming.catalog.application.port.SongRepositoryPort;
 import com.music.streaming.catalog.domain.DuplicatedSongException;
 import com.music.streaming.catalog.domain.InvalidSongException;
 import com.music.streaming.catalog.domain.Song;
@@ -13,7 +13,7 @@ import java.util.UUID;
 @SuperBuilder
 public class CreateSongCommand {
     @NonNull
-    final SongRepository songRepository;
+    final SongRepositoryPort songRepository;
     @NonNull
     final SongDomainService songDomainService;
     final String title;
