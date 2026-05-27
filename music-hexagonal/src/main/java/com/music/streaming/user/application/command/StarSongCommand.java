@@ -35,7 +35,7 @@ public class StarSongCommand {
         }
 
         if(starredSongs.size() >= User.MAX_STARRED_SONGS){
-            notificator.notifyLimitReached(userId);
+            notificator.notifyLimitReached(u.getEmail());
             throw new StarredLimitReachedException();
         }
 
