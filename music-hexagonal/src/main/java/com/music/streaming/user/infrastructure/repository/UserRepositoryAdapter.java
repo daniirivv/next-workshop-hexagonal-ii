@@ -43,8 +43,7 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
     }
 
     @Override
-    public String createUser(User user) {
+    public void createUser(User user) {
         userJpaRepository.save(userEntityMapper.fromDomain(user));
-        return user.getId();
     }
 }
