@@ -33,7 +33,7 @@ public class SongController {
     final SongDomainService songDomainService;
 
     @GetMapping
-    public ResponseEntity getAllSongs() {
+    public ResponseEntity<List<GetSongResponseDTO>> getAllSongs() {
         List<Song> songs = GetAllSongsQuery.builder().songRepository(songRepository).build().execute();
         if (songs.isEmpty()) return ResponseEntity.noContent().build();
         List<GetSongResponseDTO> songsResponse = songs.stream().map(songFacadeMapper::fromDomain).toList();
@@ -41,7 +41,7 @@ public class SongController {
     }
 
     @PostMapping
-    public ResponseEntity createSong(@RequestBody PostSongRequestDTO songDto) {
+    public ResponseEntity<Void> createSong(@RequestBody PostSongRequestDTO songDto) {
         try {
             String id = CreateSongCommand.builder()
                     .songRepository(songRepository)
@@ -61,13 +61,13 @@ public class SongController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity getSongById(@PathVariable String id) {
+    public ResponseEntity<GetSongResponseDTO> getSongById(@PathVariable String id) {
         Optional<Song> song = GetSongByIdQuery.builder().songRepository(songRepository).id(id).build().execute();
-        return song.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(songFacadeMapper.fromDomain(song.get()));
+        return song.map(value -> ResponseEntity.ok(songFacadeMapper.fromDomain(value))).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity updateSong(@PathVariable String id, @RequestBody PatchSongRequestDTO songDto) {
+    public ResponseEntity<Void> updateSong(@PathVariable String id, @RequestBody PatchSongRequestDTO songDto) {
         try {
             UpdateSongCommand.builder()
                     .songRepository(songRepository)
@@ -88,7 +88,7 @@ public class SongController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteSong(@PathVariable String id) {
+    public ResponseEntity<Void> deleteSong(@PathVariable String id) {
         try {
             DeleteSongCommand.builder().songRepository(songRepository).id(id).build().handle();
         } catch (InvalidSongException e) {

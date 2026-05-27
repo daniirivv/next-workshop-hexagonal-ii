@@ -31,7 +31,7 @@ public class UserController {
     final UserRepositoryPort userRepositoryPort;
 
     @GetMapping
-    public ResponseEntity getAllUsers() {
+    public ResponseEntity<List<GetUserResponseDTO>> getAllUsers() {
         List<User> users = GetAllUsersQuery.builder().userRepository(userRepositoryPort).build().execute();
         if (users.isEmpty()) return ResponseEntity.noContent().build();
         List<GetUserResponseDTO> usersResponse = users.stream().map(userFacadeMapper::fromDomain).toList();
@@ -39,7 +39,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity createUser(@RequestBody PostUserRequestDTO userDto) {
+    public ResponseEntity<Void> createUser(@RequestBody PostUserRequestDTO userDto) {
         try {
             String id = CreateUserCommand.builder()
                     .userRepository(userRepositoryPort)
@@ -55,13 +55,13 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity getUserById(@PathVariable String id) {
+    public ResponseEntity<GetUserResponseDTO> getUserById(@PathVariable String id) {
         Optional<User> user = GetUserByIdQuery.builder().userRepository(userRepositoryPort).id(id).build().execute();
-        return user.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(userFacadeMapper.fromDomain(user.get()));
+        return user.map(value -> ResponseEntity.ok(userFacadeMapper.fromDomain(value))).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity updateUser(@PathVariable String id, @RequestBody PatchUserRequestDTO userDto) {
+    public ResponseEntity<Void> updateUser(@PathVariable String id, @RequestBody PatchUserRequestDTO userDto) {
         try {
             UpdateUserCommand.builder()
                     .userRepository(userRepositoryPort)
@@ -78,7 +78,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteUser(@PathVariable String id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable String id) {
         try {
             DeleteUserCommand.builder().userRepository(userRepositoryPort).id(id).build().handle();
         } catch (InvalidUserException e) {
