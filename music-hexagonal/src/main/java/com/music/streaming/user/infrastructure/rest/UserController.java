@@ -1,18 +1,18 @@
 package com.music.streaming.user.infrastructure.rest;
 
 import com.music.streaming.catalog.application.port.SongRepositoryPort;
+import com.music.streaming.catalog.domain.Song;
 import com.music.streaming.catalog.infrastructure.rest.dto.response.GetSongResponseDTO;
-import com.music.streaming.user.application.command.CreateUserCommand;
-import com.music.streaming.user.application.command.DeleteUserCommand;
-import com.music.streaming.user.application.command.UpdateUserCommand;
+import com.music.streaming.catalog.infrastructure.rest.mapper.SongFacadeMapper;
+import com.music.streaming.user.application.command.*;
+import com.music.streaming.user.application.port.StarredSongsNotificationPort;
 import com.music.streaming.user.application.port.UserRepositoryPort;
+import com.music.streaming.user.application.query.GetAllStarredSongByUserIdQuery;
 import com.music.streaming.user.application.query.GetAllUsersQuery;
 import com.music.streaming.user.application.query.GetUserByIdQuery;
-import com.music.streaming.user.domain.DuplicatedUserException;
-import com.music.streaming.user.domain.InvalidUserException;
-import com.music.streaming.user.domain.User;
-import com.music.streaming.user.domain.UserNotFoundException;
+import com.music.streaming.user.domain.*;
 import com.music.streaming.user.infrastructure.rest.dto.request.PatchUserRequestDTO;
+import com.music.streaming.user.infrastructure.rest.dto.request.PostStarredSongRequestDTO;
 import com.music.streaming.user.infrastructure.rest.dto.request.PostUserRequestDTO;
 import com.music.streaming.user.infrastructure.rest.dto.response.GetUserResponseDTO;
 import com.music.streaming.user.infrastructure.rest.mapper.UserFacadeMapper;
@@ -32,6 +32,8 @@ public class UserController {
     final UserFacadeMapper userFacadeMapper;
     final UserRepositoryPort userRepositoryPort;
     final SongRepositoryPort songRepository;
+    final StarredSongsNotificationPort starredSongsNotificator;
+    private final SongFacadeMapper songFacadeMapper;
 
     @GetMapping
     public ResponseEntity<List<GetUserResponseDTO>> getAllUsers() {
@@ -93,17 +95,48 @@ public class UserController {
     }
 
     @GetMapping("/{id}/starred-songs")
-    public ResponseEntity<List<GetSongResponseDTO>> getStarredSongs(@PathVariable String id) {
-
+    public ResponseEntity<List<GetSongResponseDTO>> getStarredSongs(@PathVariable String id){
+        try{
+            List<Song> starredSongs = GetAllStarredSongByUserIdQuery.builder().userRepository(userRepositoryPort).songRepository(songRepository).build().execute(id);
+            if (starredSongs.isEmpty()) return ResponseEntity.noContent().build();
+            List<GetSongResponseDTO> starredSongsResponse = starredSongs.stream().map(songFacadeMapper::fromDomain).toList();
+            return ResponseEntity.ok(starredSongsResponse);
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    @PatchMapping("/{id}/songs")
-    public ResponseEntity<Void> addSongToStarredList(){
-
+    @PostMapping("/{userId}/starred-songs")
+    public ResponseEntity<Void> addSongToStarredList(@PathVariable String userId, @RequestBody PostStarredSongRequestDTO songDTO) {
+        try {
+            StarSongCommand.builder()
+                    .userRepository(userRepositoryPort)
+                    .notificator(starredSongsNotificator)
+                    .userId(userId)
+                    .songId(songDTO.getSongId())
+                    .build().handle();
+            return ResponseEntity.noContent().build();
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (InvalidStarredException e) {
+            return ResponseEntity.unprocessableEntity().build();
+        } catch (StarredLimitReachedException e) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build(); // Porque ha superado el límite de negocio
+        }
     }
 
-    @PatchMapping("/{id}/songs")
-    public ResponseEntity<Void> removeSongFromStarredList() {
-
+    @DeleteMapping("/{userId}/starred-songs/{songId}")
+    public ResponseEntity<Void> removeSongFromStarredList(@PathVariable String userId, @PathVariable String songId){
+            try {
+                UnstarSongCommand.builder().userRepository(userRepositoryPort)
+                        .userId(userId)
+                        .songId(songId)
+                        .build().handle();
+                return ResponseEntity.noContent().build();
+            } catch (UserNotFoundException e) {
+                return ResponseEntity.notFound().build();
+            } catch (InvalidStarredException e) {
+                return ResponseEntity.unprocessableEntity().build();
+            }
     }
 }
