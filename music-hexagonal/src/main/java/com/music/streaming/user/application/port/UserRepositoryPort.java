@@ -11,5 +11,5 @@ public interface UserRepositoryPort {
     Optional<User> getUserByEmail(String email);
     void deleteUser(String id);
     void updateUser(User user);
-    String createUser(User user);
+    void createUser(User user);
 }
