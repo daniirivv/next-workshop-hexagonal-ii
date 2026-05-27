@@ -12,6 +12,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @SuperBuilder
 public class User {
+
+    public static final int MAX_STARRED_SONGS = 10;
+
     @Builder.Default
     final String id = UUID.randomUUID().toString();
     @With
@@ -20,5 +23,5 @@ public class User {
     String email;
     @Builder.Default
     @With
-    List<String> starredSongIds = new ArrayList<>();
+    List<String> starredSongIds = new ArrayList<>(Math.min(MAX_STARRED_SONGS, MAX_STARRED_SONGS));
 }

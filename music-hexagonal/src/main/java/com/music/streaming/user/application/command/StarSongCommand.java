@@ -3,6 +3,7 @@ package com.music.streaming.user.application.command;
 import com.music.streaming.user.application.port.StarredSongsNotificationPort;
 import com.music.streaming.user.application.port.UserRepositoryPort;
 import com.music.streaming.user.domain.SongAlreadyStarredException;
+import com.music.streaming.user.domain.StarredLimitReachedException;
 import com.music.streaming.user.domain.User;
 import com.music.streaming.user.domain.UserNotFoundException;
 import lombok.NonNull;
@@ -16,11 +17,12 @@ public class StarSongCommand {
 
     @NonNull
     final UserRepositoryPort userRepository;
+    @NonNull
     final StarredSongsNotificationPort notificator;
     final String userId;
     final String songId;
 
-    public void handle() throws UserNotFoundException, SongAlreadyStarredException {
+    public void handle() throws UserNotFoundException, SongAlreadyStarredException, StarredLimitReachedException {
         Optional<User> user = this.userRepository.getUserById(userId);
         if(user.isEmpty()){
             throw new UserNotFoundException();
@@ -30,6 +32,11 @@ public class StarSongCommand {
         List<String> starredSongs = u.getStarredSongIds();
         if(starredSongs.contains(songId)){
             throw new SongAlreadyStarredException();
+        }
+
+        if(starredSongs.size() >= User.MAX_STARRED_SONGS){
+            notificator.notifyLimitReached(userId);
+            throw new StarredLimitReachedException();
         }
 
         starredSongs.add(songId);
